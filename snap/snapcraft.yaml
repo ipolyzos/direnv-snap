@@ -1,0 +1,43 @@
+# Description: Snap package for the direnv cli, an environment switcher for the shell. It knows how to hook into bash, zsh, tcsh, 
+#              fish shell and elvish to load or unload environment variables depending on the current directory. This allows 
+#              project-specific environment variables without cluttering the ~/.profile file.
+#
+# direnv Homepage: https://direnv.net/
+# Wiki: https://github.com/direnv/direnv/wiki
+#
+# Snap author: Ioannis Polyzos 
+
+name: direnv
+version: 'v2.12.0'
+summary: direnv Snap package 
+description: | 
+  direnv is an environment switcher for the shell. It knows how to hook into bash, zsh, tcsh, fish shell and elvish to load or unload environment variables depending on the current directory. This allows project-specific environment variables without cluttering the ~/.profile file.
+
+  Before each prompt, direnv checks for the existence of a ".envrc" file in the current and parent directories. If the file exists (and is authorized), it is loaded into a bash sub-shell and all exported variables are then captured by direnv and then made available to the current shell.
+
+  Because direnv is compiled into a single static executable, it is fast enough to be unnoticeable on each prompt. It is also language-agnostic and can be used to build solutions similar to rbenv, pyenv and phpenv.
+
+grade: stable
+confinement: strict
+
+parts:
+  direnv:
+    source-type: git
+    source: https://github.com/direnv/direnv
+    source-tag: ${SNAPCRAFT_PROJECT_VERSION}
+    plugin: go 
+    go-importpath: github.com/direnv/direnv
+    override-build: |
+      export GOPATH=$(realpath ../go)
+      
+      cd ${GOPATH}/src/github.com/direnv/direnv/
+      
+      mkdir -p ${SNAPCRAFT_PART_INSTALL}/bin/
+      
+      make install DESTDIR=${SNAPCRAFT_PART_INSTALL}
+      chmod +x ${SNAPCRAFT_PART_INSTALL}/bin/direnv
+
+apps:
+  direnv:
+    command: bin/direnv
+    plugs: [home,removable-media,optical-drive]
